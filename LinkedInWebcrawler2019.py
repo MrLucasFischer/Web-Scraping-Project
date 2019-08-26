@@ -33,44 +33,44 @@ current_url = 'url_placeholder' # this is a placeholder for the URL check
 df = pd.DataFrame(columns = ['name', 'title', 'location', 'profile'])
 
 # Go through pages and download data
-    while True:
-        # Check to see if url is the 100th page in search
-        if current_url.find('page=100') != -1:
-            break
-         # Check to see if this url has been scraped before; break loop if it has
-        previous_url = current_url
-        current_url = browser.current_url
-        if current_url == previous_url:
-            break
+while True:
+    # Check to see if url is the 100th page in search
+    if current_url.find('page=100') != -1:
+        break
+     # Check to see if this url has been scraped before; break loop if it has
+    previous_url = current_url
+    current_url = browser.current_url
+    if current_url == previous_url:
+        break
 
-        # Start scraping and filling in the dataframe
-        page = BeautifulSoup(browser.page_source, 'lxml')
-        page_names = page.find_all('span', class_ = 'actor-name')
-        page_titles = page.find_all('p', class_ = 'subline-level-1')
-        page_locations = page.find_all('p', class_ = 'subline-level-2')
-        page_profiles = page.find_all('a', class_ = 'search-result__result-link')
+    # Start scraping and filling in the dataframe
+    page = BeautifulSoup(browser.page_source, 'lxml')
+    page_names = page.find_all('span', class_ = 'actor-name')
+    page_titles = page.find_all('p', class_ = 'subline-level-1')
+    page_locations = page.find_all('p', class_ = 'subline-level-2')
+    page_profiles = page.find_all('a', class_ = 'search-result__result-link')
 
-    # Put scraped data into a dataframe
-        names = list(map(lambda x: x.text, page_names))
-        titles = list(map(lambda x: x.text.replace('\n', ''), page_titles))
-        locations = list(map(lambda x: x.text.replace('\n', ''), page_locations))
-        profiles = list(map(lambda x: linkedin + x['href'], page_profiles))[::2]
-        temp = pd.DataFrame({'name':names, 'title':titles, 'location':locations, 'profile':profiles})
+# Put scraped data into a dataframe
+    names = list(map(lambda x: x.text, page_names))
+    titles = list(map(lambda x: x.text.replace('\n', ''), page_titles))
+    locations = list(map(lambda x: x.text.replace('\n', ''), page_locations))
+    profiles = list(map(lambda x: linkedin + x['href'], page_profiles))[::2]
+    temp = pd.DataFrame({'name':names, 'title':titles, 'location':locations, 'profile':profiles})
 
-    # Filter out members who do not provide information
-        temp = temp[temp['name'] != 'LinkedIn Member']
+# Filter out members who do not provide information
+    temp = temp[temp['name'] != 'LinkedIn Member']
 
-    # Append new data to df
-        df = df.append(temp)
+# Append new data to df
+    df = df.append(temp)
 
-    # Stop appending if the number of retrieved records exceeds the limit
-        if df.shape[0] >= EMPLOYEE:
-            break
+# Stop appending if the number of retrieved records exceeds the limit
+    if df.shape[0] >= EMPLOYEE:
+        break
 
-    # Find next button and hit next
-        nextt = browser.find_element_by_class_name('next')
-        nextt.click()
-        time.sleep(5)
+# Find next button and hit next
+    nextt = browser.find_element_by_class_name('artdeco-pagination__button--next')
+    nextt.click()
+    time.sleep(5)
 
    
 # Reset dataframe index
